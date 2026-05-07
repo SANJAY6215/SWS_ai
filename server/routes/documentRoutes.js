@@ -6,6 +6,19 @@ const mongoose = require('mongoose');
 const Document = require('../models/Document');
 const Notification = require('../models/Notification');
 
+// In-memory store for Demo Mode
+let mockDocuments = [
+  {
+    _id: '1',
+    name: 'SWS-AI-company-overview.pdf',
+    size: 8087,
+    type: 'application/pdf',
+    path: 'uploads/mock-overview.pdf',
+    uploadDate: new Date().toISOString(),
+    status: 'complete'
+  }
+];
+
 // Configure Multer for PDF storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -31,18 +44,8 @@ const upload = multer({
 router.get('/', async (req, res) => {
   // Check if MongoDB is connected
   if (mongoose.connection.readyState !== 1) {
-    console.warn('MongoDB not connected. Returning mock data.');
-    return res.json([
-      {
-        _id: '1',
-        name: 'SWS-AI-company-overview.pdf',
-        size: 8087,
-        type: 'application/pdf',
-        path: 'uploads/mock-overview.pdf',
-        uploadDate: new Date().toISOString(),
-        status: 'complete'
-      }
-    ]);
+    console.warn('MongoDB not connected. Returning in-memory mock data.');
+    return res.json(mockDocuments);
   }
 
   try {
@@ -64,9 +67,8 @@ router.post('/upload', upload.array('files'), async (req, res) => {
 
   // Check if MongoDB is connected
   if (mongoose.connection.readyState !== 1) {
-    console.warn('MongoDB not connected. Falling back to Mock Success for demo purposes.');
-    // Return a mock success response so the UI doesn't break
-    const mockDocs = files.map(file => ({
+    console.warn('MongoDB not connected. Adding to in-memory mock store.');
+    const newMockDocs = files.map(file => ({
       _id: 'mock-' + Math.random().toString(36).substr(2, 9),
       name: file.originalname,
       size: file.size,
@@ -75,7 +77,8 @@ router.post('/upload', upload.array('files'), async (req, res) => {
       uploadDate: new Date().toISOString(),
       status: 'complete'
     }));
-    return res.status(201).json(mockDocs);
+    mockDocuments = [...newMockDocs, ...mockDocuments];
+    return res.status(201).json(newMockDocs);
   }
 
   try {
