@@ -88,7 +88,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
         if (uploadingFiles.length <= 1) setIsBulkProcessing(false);
       }, 3000);
 
-    } catch (err) {
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || 'Upload failed. Please check your connection.';
+      toast.error(errorMsg);
       setUploadingFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'failed' } : f));
     }
   };

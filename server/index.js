@@ -54,6 +54,15 @@ app.get('/', (req, res) => {
   res.send('SWS AI API is running...');
 });
 
+// Error Logging
+const fs = require('fs');
+app.use((err, req, res, next) => {
+  const errorLog = `${new Date().toISOString()} - ${err.message}\n${err.stack}\n\n`;
+  fs.appendFileSync(path.join(__dirname, 'error.log'), errorLog);
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
