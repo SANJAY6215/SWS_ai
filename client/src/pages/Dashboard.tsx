@@ -122,7 +122,7 @@ const Dashboard: React.FC = () => {
             </div>
             <FileUpload onUploadComplete={fetchDocuments} />
           </section>
-        </div>
+        </aside>
       </div>
     </div>
   );
