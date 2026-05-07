@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import FileUpload from '../components/FileUpload';
 import DocumentTable from '../components/DocumentTable';
 import api from '../services/api';
-import { Files, Info, ShieldCheck, Zap, BarChart3, Clock, CloudUpload } from 'lucide-react';
+import { Files, Info, ShieldCheck, Zap, Clock, CloudUpload } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Dashboard: React.FC = () => {
@@ -27,7 +27,6 @@ const Dashboard: React.FC = () => {
   const stats = [
     { label: 'Total Documents', value: documents.length, icon: Files, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: 'System Health', value: 'Optimal', icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Storage Used', value: '1.2 GB', icon: BarChart3, color: 'text-purple-600', bg: 'bg-purple-50' },
     { label: 'Last Activity', value: '2m ago', icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50' },
   ];
 
@@ -51,7 +50,7 @@ const Dashboard: React.FC = () => {
       </header>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, idx) => (
           <motion.div
             key={idx}
