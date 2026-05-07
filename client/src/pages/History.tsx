@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Clock, CheckCircle2, AlertCircle, Loader2, ArrowUpRight } from 'lucide-react';
+import { Clock, CheckCircle2, Loader2, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const History: React.FC = () => {
