@@ -3,30 +3,30 @@ import {
   LayoutDashboard, 
   Files, 
   Clock, 
-  Settings, 
-  ShieldCheck, 
   HelpCircle,
-  LogOut,
   Zap
 } from 'lucide-react';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', active: true },
-    { icon: Files, label: 'Documents', active: false },
-    { icon: Clock, label: 'History', active: false },
-    { icon: ShieldCheck, label: 'Security', active: false },
+    { icon: LayoutDashboard, label: 'Dashboard' },
+    { icon: Files, label: 'Documents' },
+    { icon: Clock, label: 'History' },
   ];
 
   const bottomItems = [
-    { icon: Settings, label: 'Settings' },
     { icon: HelpCircle, label: 'Help Center' },
   ];
 
   return (
     <aside className="w-72 border-r border-slate-200/60 bg-white h-screen sticky top-0 flex flex-col z-20">
       <div className="p-8 flex-1">
-        <div className="flex items-center gap-3 mb-10 group cursor-pointer">
+        <div className="flex items-center gap-3 mb-10 group cursor-pointer" onClick={() => setActiveTab('Dashboard')}>
           <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform duration-300">
             <Zap className="text-white w-6 h-6 fill-white" />
           </div>
@@ -41,15 +41,16 @@ const Sidebar: React.FC = () => {
           {menuItems.map((item, idx) => (
             <button
               key={idx}
+              onClick={() => setActiveTab(item.label)}
               className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
-                item.active 
+                activeTab === item.label
                   ? 'sidebar-item-active' 
                   : 'text-slate-500 hover:bg-slate-50 hover:text-primary'
               }`}
             >
-              <item.icon className={`w-5 h-5 transition-transform duration-300 group-hover:scale-110 ${item.active ? 'text-white' : ''}`} />
+              <item.icon className={`w-5 h-5 transition-transform duration-300 group-hover:scale-110 ${activeTab === item.label ? 'text-white' : ''}`} />
               <span className="font-semibold text-sm">{item.label}</span>
-              {item.active && <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_8px_white]" />}
+              {activeTab === item.label && <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_8px_white]" />}
             </button>
           ))}
         </nav>
@@ -66,10 +67,6 @@ const Sidebar: React.FC = () => {
             <span className="font-semibold text-sm">{item.label}</span>
           </button>
         ))}
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all duration-300 mt-4 group">
-          <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
-          <span className="font-semibold text-sm">Logout</span>
-        </button>
       </div>
     </aside>
   );

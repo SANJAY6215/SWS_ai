@@ -48,15 +48,6 @@ const Dashboard: React.FC = () => {
             Streamline your organizational workflow with AI-powered document management and real-time processing.
           </p>
         </div>
-        
-        <div className="flex items-center gap-4">
-          <button className="px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all premium-shadow">
-            View Analytics
-          </button>
-          <button className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all premium-shadow">
-            Generate Report
-          </button>
-        </div>
       </header>
 
       {/* Stats Grid */}

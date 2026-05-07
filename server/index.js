@@ -35,9 +35,16 @@ io.on('connection', (socket) => {
 app.set('io', io);
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sws-ai')
+const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/sws-ai';
+mongoose.connect(mongoURI, {
+  serverSelectionTimeoutMS: 5000, // Fail fast if no mongo (5s instead of 30s)
+})
   .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .catch(err => {
+    console.error('MongoDB connection error. Please ensure MongoDB is running!');
+    console.error('URI:', mongoURI);
+    console.error('Error Details:', err.message);
+  });
 
 // Routes
 app.use('/api/documents', require('./routes/documentRoutes'));

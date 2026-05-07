@@ -1,8 +1,7 @@
 import React, { useCallback, useState } from 'react';
-import { Upload, X, FileText, CheckCircle2, AlertCircle, CloudUpload } from 'lucide-react';
+import { FileText, CheckCircle2, AlertCircle, CloudUpload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
-import socket from '../services/socket';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -164,7 +163,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
               </div>
             </div>
             
-            <div className="space-y-6">
+            <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
               {uploadingFiles.map((file) => (
                 <motion.div 
                   layout

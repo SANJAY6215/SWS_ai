@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Search, User, Command } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import socket from '../services/socket';
 import api from '../services/api';
 
@@ -43,21 +43,8 @@ const Header: React.FC = () => {
 
   return (
     <header className="h-20 bg-white/50 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-10 sticky top-0 z-40">
-      <div className="flex items-center gap-4 w-1/3">
-        <div className="relative w-full max-w-lg group">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-            <Search className="w-4 h-4" />
-          </div>
-          <input 
-            type="text" 
-            placeholder="Search assets, documents..." 
-            className="w-full pl-12 pr-12 py-3 bg-slate-100/50 border border-transparent rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary/20 transition-all text-sm font-medium"
-          />
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-white border border-slate-200 px-1.5 py-0.5 rounded text-[10px] font-bold text-slate-400">
-            <Command className="w-2.5 h-2.5" />
-            K
-          </div>
-        </div>
+      <div className="flex items-center gap-4">
+        {/* Simplified Header - Branding already in Sidebar */}
       </div>
 
       <div className="flex items-center gap-6">
@@ -114,15 +101,6 @@ const Header: React.FC = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
-          <div className="text-right hidden lg:block">
-            <p className="text-sm font-bold text-slate-900">SWS Admin</p>
-            <p className="text-[10px] font-bold text-primary uppercase tracking-widest mt-0.5">Administrator</p>
-          </div>
-          <div className="w-11 h-11 bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-slate-900/20 group cursor-pointer hover:scale-105 transition-transform">
-            <User className="w-6 h-6" />
-          </div>
-        </div>
       </div>
     </header>
   );

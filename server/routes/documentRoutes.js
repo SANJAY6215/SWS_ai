@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const mongoose = require('mongoose');
 const Document = require('../models/Document');
 const Notification = require('../models/Notification');
 
@@ -43,6 +44,13 @@ router.post('/upload', upload.array('files'), async (req, res) => {
   
   if (!files || files.length === 0) {
     return res.status(400).json({ message: 'No files uploaded' });
+  }
+
+  // Check if MongoDB is connected
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ 
+      message: 'Database connection is currently unavailable. Please ensure MongoDB is running and try again.' 
+    });
   }
 
   try {
