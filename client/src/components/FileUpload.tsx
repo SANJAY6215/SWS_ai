@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Upload, X, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Upload, X, FileText, CheckCircle2, AlertCircle, CloudUpload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import socket from '../services/socket';
@@ -52,17 +52,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
     
     if (fileObjects.length > 3) {
       setIsBulkProcessing(true);
-      toast.info(`Upload in progress — processing ${fileObjects.length} files in background.`);
+      toast.info(`Bulk processing initiated for ${fileObjects.length} files`);
     }
 
-    // Simulate upload for each file (since we're using a simple multer setup)
     for (const fileObj of fileObjects) {
       await uploadFile(fileObj);
     }
 
-    if (fileObjects.length > 3) {
-      // Background process simulated notification will come from backend via socket
-    } else {
+    if (fileObjects.length <= 3) {
       onUploadComplete();
     }
   };
@@ -74,14 +71,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
     setUploadingFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'uploading' } : f));
 
     try {
-      // Mocking progress for better UX as Multer doesn't give intermediate progress easily without more complex setup
       let progress = 0;
       const interval = setInterval(() => {
         progress += 10;
         if (progress <= 90) {
           setUploadingFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, progress } : f));
         }
-      }, 200);
+      }, 150);
 
       await api.post('/documents/upload', formData);
       
@@ -91,7 +87,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
       setTimeout(() => {
         setUploadingFiles(prev => prev.filter(f => f.id !== fileObj.id));
         if (uploadingFiles.length <= 1) setIsBulkProcessing(false);
-      }, 2000);
+      }, 3000);
 
     } catch (err) {
       setUploadingFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'failed' } : f));
@@ -105,30 +101,45 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div 
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        className={`relative border-2 border-dashed rounded-2xl p-12 transition-all flex flex-col items-center justify-center gap-4 ${
-          isDragging ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-slate-200 bg-white hover:border-primary/50'
+        className={`relative border-2 border-dashed rounded-[2rem] p-16 transition-all duration-500 flex flex-col items-center justify-center gap-6 overflow-hidden group ${
+          isDragging 
+            ? 'border-primary bg-primary/[0.03] scale-[1.02] shadow-2xl shadow-primary/10' 
+            : 'border-slate-200 bg-white hover:border-primary/40 hover:bg-slate-50/50'
         }`}
       >
-        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-          <Upload className="w-8 h-8 text-primary" />
+        {/* Animated background elements */}
+        <div className={`absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl transition-opacity duration-500 ${isDragging ? 'opacity-100' : 'opacity-0'}`} />
+        <div className={`absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl transition-opacity duration-500 ${isDragging ? 'opacity-100' : 'opacity-0'}`} />
+
+        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-2 transition-all duration-500 transform ${
+          isDragging ? 'bg-primary text-white scale-110 rotate-12 shadow-xl shadow-primary/30' : 'bg-slate-100 text-slate-400 group-hover:scale-110 group-hover:text-primary group-hover:bg-primary/10'
+        }`}>
+          <CloudUpload className="w-10 h-10" />
         </div>
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-slate-800">Click or drag files to upload</h3>
-          <p className="text-sm text-slate-500 mt-1">Only PDF files are supported. Max file size 10MB.</p>
+        
+        <div className="text-center relative z-10">
+          <h3 className="text-2xl font-bold text-slate-900 mb-2">Drop your PDFs here</h3>
+          <p className="text-slate-500 font-medium">Or click to browse from your computer</p>
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-3 py-1 bg-slate-100 rounded-full">Max 10MB</span>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-3 py-1 bg-slate-100 rounded-full">PDF Only</span>
+          </div>
         </div>
+
         <input 
           type="file" 
           multiple 
           accept=".pdf"
           onChange={(e) => handleFiles(e.target.files)}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
         />
-        <button className="mt-2 px-6 py-2.5 bg-primary text-white rounded-lg font-medium shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
+        
+        <button className="relative z-10 mt-2 px-8 py-3 bg-slate-900 text-white rounded-xl font-bold shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all duration-300 hover:-translate-y-0.5">
           Select Files
         </button>
       </div>
@@ -136,60 +147,67 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
       <AnimatePresence>
         {uploadingFiles.length > 0 && (
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="bg-white border rounded-2xl p-6 shadow-sm overflow-hidden"
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="glass-card rounded-[2rem] p-8 premium-shadow relative overflow-hidden"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="font-semibold text-slate-800 flex items-center gap-2">
-                Uploading {uploadingFiles.length} files 
-                {isBulkProcessing && <span className="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Background Processing</span>}
-              </h4>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h4 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                  Upload Queue
+                  <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                    {uploadingFiles.length} Active
+                  </span>
+                </h4>
+                {isBulkProcessing && <p className="text-sm text-slate-500 mt-1">Processing in background... You can continue working.</p>}
+              </div>
             </div>
             
-            <div className={`space-y-4 ${isBulkProcessing ? 'max-h-40 overflow-y-auto pr-2' : ''}`}>
+            <div className="space-y-6">
               {uploadingFiles.map((file) => (
-                <div key={file.id} className="relative">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center">
-                        <FileText className="w-5 h-5 text-slate-400" />
+                <motion.div 
+                  layout
+                  key={file.id} 
+                  className="p-5 bg-slate-50/50 rounded-2xl border border-slate-100 group"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                        <FileText className="w-6 h-6 text-primary" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-700 truncate max-w-[200px]">{file.file.name}</p>
-                        <p className="text-xs text-slate-400">{(file.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <p className="text-sm font-bold text-slate-900 truncate max-w-[250px]">{file.file.name}</p>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">{(file.file.size / 1024 / 1024).toFixed(2)} MB • {file.status}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-semibold text-slate-500">{file.progress}%</span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-bold text-slate-900">{file.progress}%</span>
                       {file.status === 'complete' ? (
-                        <CheckCircle2 className="w-5 h-5 text-green-500" />
+                        <CheckCircle2 className="w-6 h-6 text-green-500" />
                       ) : file.status === 'failed' ? (
-                        <AlertCircle className="w-5 h-5 text-red-500" />
+                        <AlertCircle className="w-6 h-6 text-red-500" />
                       ) : (
-                        <button className="p-1 hover:bg-slate-100 rounded">
-                          <X className="w-4 h-4 text-slate-400" />
-                        </button>
+                        <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
                       )}
                     </div>
                   </div>
-                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: `${file.progress}%` }}
-                      className={`h-full transition-all ${
-                        file.status === 'failed' ? 'bg-red-500' : 'bg-primary'
+                      className={`h-full transition-all duration-500 ${
+                        file.status === 'failed' ? 'bg-red-500' : 'bg-gradient-to-r from-primary to-blue-500'
                       }`}
                     />
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-      <ToastContainer position="bottom-right" />
+      <ToastContainer position="top-right" />
     </div>
   );
 };
